@@ -2,6 +2,7 @@
 error_reporting(-1);
 ini_set('display_errors',1);
 $request_body = file_get_contents('php://input');
+
 $xml = simplexml_load_string($request_body);
 
 switch($xml->methodName)
@@ -22,15 +23,23 @@ switch($xml->methodName)
 		//@see http://codex.wordpress.org/XML-RPC_WordPress_API/Posts#wp.newPost
 		$obj = new stdClass;
 		//get the parameters from xml
-		$obj->user = (string)$xml->params->param[1]->value->string;
-		$obj->pass = (string)$xml->params->param[2]->value->string;
+		$obj->direct_print_code = (string)$xml->params->param[1]->value->string;
+		$obj->password = (string)$xml->params->param[2]->value->string;
 
 		//@see content in the wordpress docs
 		$content = $xml->params->param[3]->value->struct->member;
 		foreach($content as $data)
 		{
 			switch((string)$data->name)
-			{
+			{	
+				case 'title':
+					$obj->instagram_url = (string)$data->value->string;
+					break;
+					
+				case 'description':
+					$obj->caption = (string)$data->value->string;
+					break;
+					
 				//neglect these sections of the request
 				case 'post_status' ://publish status
 				case 'mt_keywords': //tags
@@ -43,39 +52,34 @@ switch($xml->methodName)
 						array_push($categories,(string)$cat);
 					$obj->categories = $categories;
 					break;
-				
-				case 'description':
-					$url = (string)$data->value->string;
-					break;
-				//this is used for title
+					
+				// misc
 				default:
 					$obj->{$data->name} = (string)$data->value->string;
 			}
 		}
 
 		//Make the webrequest
-		//Only if we have a valid url
-		if(valid_url($url,true))
-		{
-			// Load Requests Library
-			include('requests/Requests.php');
-			Requests::register_autoloader();
+		include('requests/Requests.php');
+		Requests::register_autoloader();
 
-			$headers = array('Content-Type' => 'application/json');
-			$response = Requests::post($url, $headers, json_encode($obj));
-
-			if($response->success)
-				success('<string>'.$response->status_code.'</string>');
-			else
-				failure($response->status_code);
-		}
-		else
-		{
-			//since the url was invalid, we return 400 (Bad Request)
-			failure(400);
-		}
+		$html = 'html=<html><head><meta charset="utf-8"></head><body style="text-align:center">
+			<h1 style="font-family:Cabin">if<em>#lp</em>then<em>print</em></h1>
+			<img class="dither" width="380px" src="'.$obj->instagram_url.'"/>';
+			if (!empty($obj->caption)) {
+				$html .='<p>'.$obj->caption.'</p>';
+			}
+		$html .='</body></html>';
 		
-}
+		$url = 'http://remote.bergcloud.com/playground/direct_print/'.$obj->direct_print_code;
+					
+		$response = Requests::post($url, null, $html);
+
+		if($response->success)
+			success('<string>'.$response->status_code.'</string>');
+		else
+			failure($response->status_code);
+		}
 
 /** Copied from wordpress */
 
