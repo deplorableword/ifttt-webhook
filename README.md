@@ -1,17 +1,18 @@
 ifttt-webhook / Instagram to Little Printer
 =============
 
-A webhook middleware for the ifttt.com service which allows printing direct to Little Printer.
+A webhook middleware for the ifttt.com service which allows printing direct from Instagram to Little Printer.
 
 #How To Use
 
 If you want to simply print your Instgram photos via Little Printer, just follow the instructions below.
 
-1. Setup a new WordPress channel.
+1. Setup a new WordPress channel. https://ifttt.com/wordpress
 2. Set blog url to iflpthenprint.nfshost.com 
 3. Go here http://remote.bergcloud.com/developers/littleprinter/direct_print_codes and get your Direct Print Code. Set this to be the username in the Channel settings. 
 4. Set the password to be anything :)
 5. Activate this recipe https://ifttt.com/recipes/167179-if-lp-then-send-to-littleprinter
+6. Take a photo and tag it #lp. Photos may take up to 15 minutes to arrive. Selecting "check now" on the IFTTT recipe will make it print straight away. 
 
 Any problems Tweet [@deplorableword](https://twitter.com/@deplorableword)
 
